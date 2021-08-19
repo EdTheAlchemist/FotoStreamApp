@@ -51,10 +51,12 @@ public class AddPostActivity extends AppCompatActivity {
     private ImageView tempImageIv;
     private Button selectBtn, addBtn;
 
+    // A variable that holds the temporary image path selected by the user.
     private Uri imageUri = null;
 
-    private DocumentReference userRef;
-
+    /* Handles the return intent from the image selector. Stores the imageUri and extracts the image
+     * and inserts it into the ImageView.
+     * */
     private ActivityResultLauncher<Intent> myActivityResultLauncher = registerForActivityResult(
         new ActivityResultContracts.StartActivityForResult(),
         new ActivityResultCallback<ActivityResult>() {
@@ -94,6 +96,7 @@ public class AddPostActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_post);
 
+        // Extracts the user ID sent from the adapter / ViewHolder
         String userIdString = getIntent().getStringExtra(IntentKeys.USER_ID_KEY.name());
 
         // View initialization
@@ -103,7 +106,8 @@ public class AddPostActivity extends AppCompatActivity {
         this.selectBtn = findViewById(R.id.selectBtn);
         this.addBtn = findViewById(R.id.addBtn);
 
-        this.userRef = MyFirestoreReferences.getDocumentReference(userIdString);
+        // Reference to the User document of the person who uploaded this Post.
+        DocumentReference userRef = MyFirestoreReferences.getDocumentReference(userIdString);
 
         // Logic for selecting an image from the image picker
         this.selectBtn.setOnClickListener(new View.OnClickListener() {
@@ -116,14 +120,19 @@ public class AddPostActivity extends AppCompatActivity {
             }
         });
 
+        /* There's a lot here, but basically it handles the (1) uploading of the image and (2) the
+         * uploading of the Post information.
+         * */
         this.addBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(imageUri != null) {
+                    // This is a prompt for the user to know the status of the image upload
                     final ProgressDialog progressDialog = new ProgressDialog(AddPostActivity.this);
                     progressDialog.setTitle("Uploading");
                     progressDialog.show();
 
+                    // Readying the Post object for adding to the Post collection.
                     Post p = new Post(
                             userRef,
                             captionEtv.getText().toString(),
@@ -131,10 +140,17 @@ public class AddPostActivity extends AppCompatActivity {
                             imageUri.toString()
                     );
 
+                    // Reference of the image in Firebase Storage
                     StorageReference imageRef = MyFirestoreReferences.getStorageReferenceInstance()
                             .child(MyFirestoreReferences.generateNewImagePath(userRef, imageUri));
+                    // Post collection reference
                     CollectionReference postsRef = MyFirestoreReferences.getPostCollectionReference();
 
+                    /* t1 involves uploading the image to the Firebase Storage. We add an
+                     * OnProgressListener so we can send updates to the user regarding how much
+                     * the image upload has progressed. t1 is an UploadTask and OnProgressListener
+                     * is unique to UploadTasks.
+                     * */
                     Task t1 = imageRef.putFile(imageUri)
                         .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                             @Override
@@ -144,8 +160,16 @@ public class AddPostActivity extends AppCompatActivity {
                                 progressDialog.setMessage("Uploaded  " + (int) progress + "%");
                             }
                         });
+                    // t2 handles adding the Post to the Post collection
                     Task t2 = postsRef.add(p);
 
+                    /* I originally wanted to merge t1 and t2 completely in a whenAllSuccess;
+                     * however, as t1 is an UploadTask and only UploadTasks have an
+                     * OnProgressListener, we can't add an onProgressListener to the grouped tasks.
+                     * Hence why we added in the listener earlier and then added the OnSuccess and
+                     * OnFailure only here. This way, we reduce the number of Listeners we need to
+                     * declare.
+                     * */
                     Tasks.whenAllSuccess(t1, t2)
                         .addOnSuccessListener(new OnSuccessListener<List<Object>>() {
                             @Override
@@ -153,6 +177,8 @@ public class AddPostActivity extends AppCompatActivity {
                                 progressDialog.setCanceledOnTouchOutside(true);
                                 progressDialog.setMessage("Success!");
 
+                                // If both tasks are successful, we finish this activity and return
+                                // to the ImageStreamActivity
                                 finish();
                             }
                         })
@@ -164,6 +190,7 @@ public class AddPostActivity extends AppCompatActivity {
                             }
                         });
                 } else {
+                    // Error message when no image was selected. We need at least an image to post.
                     Toast.makeText(
                             AddPostActivity.this,
                             "Please supply an image to post.",

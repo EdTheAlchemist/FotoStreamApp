@@ -32,16 +32,17 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 
 public class ImageStreamActivity extends AppCompatActivity {
+    // Views needed
     private ImageButton addBtn;
     private TextView welcomeTv;
 
+    // Views related to the RecyclerView
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
     private MyAdapter myAdapter;
 
+    // Internal references of the current logged in user
     private String username, userIdString;
-
-    private CollectionReference postsRef;
 
     /* For Reference:
      *      Firebase Firestore
@@ -64,16 +65,20 @@ public class ImageStreamActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_stream);
 
+        // Information from the LoginActivity
         this.username = getIntent().getStringExtra(IntentKeys.USERNAME_KEY.name());
         this.userIdString = getIntent().getStringExtra(IntentKeys.USER_ID_KEY.name());
 
+        // View initializaiton
         this.welcomeTv = findViewById(R.id.welcomeTv);
         this.addBtn = findViewById(R.id.addBtn);
         this.recyclerView = findViewById(R.id.recyclerView);
         this.swipeRefreshLayout = findViewById(R.id.swipeLayout);
 
+        // Set the welcoming message
         this.welcomeTv.setText("Welcome, " + username + "!");
 
+        // Sends the user to the AddPostActivity
         this.addBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -83,12 +88,17 @@ public class ImageStreamActivity extends AppCompatActivity {
             }
         });
 
+        // Sets a grid view for the recyclerview with a 2-item row
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
         this.recyclerView.setLayoutManager(gridLayoutManager);
 
         myAdapter = new MyAdapter();
         recyclerView.setAdapter(myAdapter);
 
+        /* The swipeRefreshLayout is triggered when the user decided to swipe down. This simulates
+         * a "refresh" -- hence the onRefresh() method. We override the onRefresh to add our own
+         * logic (updateDataAndAdapter()), as well as animate the swipeRefreshLayout loading cirle.
+         * */
         this.swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -102,9 +112,15 @@ public class ImageStreamActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
+        // When the user comes back, we perform an update.
         updateDataAndAdapter();
     }
 
+    /* This method is responsible for querying all Posts from the Post collection and updating the
+     * adapter. This method only contains one statement but helps in improving readability in the
+     * onCreate and onStart methods.
+     * */
     private void updateDataAndAdapter() {
         MyFirestoreReferences.getPostCollectionReference()
             .orderBy(MyFirestoreReferences.TIMESTAMP_FIELD)

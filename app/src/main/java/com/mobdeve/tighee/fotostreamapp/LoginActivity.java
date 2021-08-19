@@ -60,6 +60,10 @@ public class LoginActivity extends AppCompatActivity {
                 // Get the username from the EditText
                 String username = usernameEtv.getText().toString();
 
+                /* This statement handles checking if a username is part of the User collection yet.
+                 * If no user is present, then a write operation is performed to the DB. Otherwise,
+                 * the user is brought to the ChatRoomActivity.
+                 * */
                 MyFirestoreReferences.getUserCollectionReference()
                     .whereEqualTo(MyFirestoreReferences.USERNAME_FIELD, username)
                     .get()
@@ -79,6 +83,9 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    /* Handles building a dialog prompt that asks the user if they want to proceed with creating an
+     * account. This is also where the write operation is performed.
+     * */
     private void showNewUserDialog(String username) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("This seems to be a new account. Would you like for us to create an account for you?");
@@ -123,6 +130,7 @@ public class LoginActivity extends AppCompatActivity {
         alert.show();
     }
 
+    // This method sends both the username and the userId in hopes to reduce the number of DB calls.
     private void moveToChatRoomActivity(String username, String userId) {
         runOnUiThread(new Runnable() {
             @Override
