@@ -71,8 +71,8 @@ public class PostActivity extends AppCompatActivity {
         String userRefString = i.getStringExtra(IntentKeys.USER_ID_KEY.name());
 
         // Create document references of the Post and User
-        DocumentReference postRef = MyFirestoreReferences.getDocumentReference(postRefString);
-        DocumentReference userRef = MyFirestoreReferences.getDocumentReference(userRefString);
+        DocumentReference postRef = MyFirestoreReferences.getPostDocumentReference(postRefString);
+        DocumentReference userRef = MyFirestoreReferences.getUserDocumentReference(userRefString);
 
         /* This is a little different that the usual way of running tasks.
          *

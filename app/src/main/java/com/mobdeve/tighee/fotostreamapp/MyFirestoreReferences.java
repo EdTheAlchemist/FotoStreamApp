@@ -72,8 +72,12 @@ public class MyFirestoreReferences {
         return postsRef;
     }
 
-    public static DocumentReference getDocumentReference(String stringRef) {
-        return getFirestoreInstance().document(stringRef);
+    public static DocumentReference getUserDocumentReference(String stringRef) {
+        return getUserCollectionReference().document(stringRef);
+    }
+
+    public static DocumentReference getPostDocumentReference(String stringRef) {
+        return getPostCollectionReference().document(stringRef);
     }
 
     /* As an image download + inserting into an ImageView is done in both the ViewHolder and the

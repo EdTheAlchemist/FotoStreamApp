@@ -107,7 +107,7 @@ public class AddPostActivity extends AppCompatActivity {
         this.addBtn = findViewById(R.id.addBtn);
 
         // Reference to the User document of the person who uploaded this Post.
-        DocumentReference userRef = MyFirestoreReferences.getDocumentReference(userIdString);
+        DocumentReference userRef = MyFirestoreReferences.getUserDocumentReference(userIdString);
 
         // Logic for selecting an image from the image picker
         this.selectBtn.setOnClickListener(new View.OnClickListener() {
