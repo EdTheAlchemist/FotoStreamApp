@@ -31,8 +31,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(view.getContext(), PostActivity.class);
-                i.putExtra(IntentKeys.POST_ID_KEY.name(), posts.get(position).getPostId().getPath());
-                i.putExtra(IntentKeys.USER_ID_KEY.name(), posts.get(position).getUserRef().getPath());
+                i.putExtra(IntentKeys.POST_ID_KEY.name(), posts.get(position).getPostId().getId());
+                i.putExtra(IntentKeys.USER_ID_KEY.name(), posts.get(position).getUserRef().getId());
                 view.getContext().startActivity(i);
             }
         });

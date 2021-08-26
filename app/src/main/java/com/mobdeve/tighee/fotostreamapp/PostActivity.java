@@ -67,12 +67,12 @@ public class PostActivity extends AppCompatActivity {
 
         // Retrieve the post ID and the user ID of the ViewHolder that was clicked
         Intent i = getIntent();
-        String postRefString = i.getStringExtra(IntentKeys.POST_ID_KEY.name());
-        String userRefString = i.getStringExtra(IntentKeys.USER_ID_KEY.name());
+        String postIdString = i.getStringExtra(IntentKeys.POST_ID_KEY.name());
+        String userIdString = i.getStringExtra(IntentKeys.USER_ID_KEY.name());
 
         // Create document references of the Post and User
-        DocumentReference postRef = MyFirestoreReferences.getPostDocumentReference(postRefString);
-        DocumentReference userRef = MyFirestoreReferences.getUserDocumentReference(userRefString);
+        DocumentReference postRef = MyFirestoreReferences.getPostDocumentReference(postIdString);
+        DocumentReference userRef = MyFirestoreReferences.getUserDocumentReference(userIdString);
 
         /* This is a little different that the usual way of running tasks.
          *
